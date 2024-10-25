@@ -1,4 +1,4 @@
-#include "./include/console.h"
+#include "console.h"
 // Collin Meeker
 //moved the clear terminal function to the console.c file
 
@@ -8,7 +8,7 @@ void main() {
 	print_string("HELLO");
 	print_line("WORLD");
 	print_string("TODAY");	
-
+		
 	//char* const VGA_BUFFER = (char*) 0xb8000;
 	//char* str = "Hello World";
 
