@@ -1,46 +1,79 @@
 #include "console.h"
 // Collin Meeker
 
+static VGA_Color terminal_font_color = LIGHT_GRAY;
+static VGA_Color terminal_background_color = BLACK;
 
 static int terminal_position = 0;
-char* const VGA_MEMORY = (char*) 0xb8000;
+static char* const VGA_MEMORY = (char*) 0xb8000;
 
 void clear_terminal() {
-	char* const VGA_BUFFER = (char*) 0xb8000;
 	int screen_size = VGA_WIDTH * VGA_HEIGHT;
 
 	for(int i = 0; i < screen_size; i++) {
-		VGA_BUFFER[i * 2] = '\0';
-		VGA_BUFFER[i * 2 + 1] = 0x07;
+		VGA_MEMORY[i * VGA_BYTES_PER_CHARACTER] = '\0';
+		VGA_MEMORY[i * VGA_BYTES_PER_CHARACTER + 1] = (terminal_background_color << 4) | terminal_font_color;
 	}
 	
 	terminal_position = 0;
 }
 
 void print_character(char c) {
-	// Using a conditional to identify the \n character, let me know if this is not necessary.
+	print_character_with_color(c, terminal_background_color, terminal_font_color);
+}
+
+void print_character_with_color(char c, VGA_Color bg_color, VGA_Color font_color) {
+
 	if(c == '\n') {
 		int row = terminal_position / VGA_WIDTH;
 		row++;
 		terminal_position = row * VGA_WIDTH;
 	} else {
+	
+		VGA_MEMORY[terminal_position * VGA_BYTES_PER_CHARACTER] = c;
+		VGA_MEMORY[terminal_position * VGA_BYTES_PER_CHARACTER + 1] = (bg_color << 4) | font_color;
 
-	VGA_MEMORY[terminal_position * VGA_BYTES_PER_CHARACTER] = c;
-	VGA_MEMORY[terminal_position * VGA_BYTES_PER_CHARACTER + 1] = 0x07;
-
-	terminal_position++;
+		terminal_position++;
 	
 	}
 }
+
+
 
 void print_string(char* str) {
+	print_string_with_color(str, terminal_background_color, terminal_font_color);
+}
+
+void print_string_with_color(char* str, VGA_Color bg_color, VGA_Color font_color) {
 	
 	for(int i = 0; str[i] != '\0'; i++) {
-		print_character(str[i]);
+		print_character_with_color(str[i], bg_color, font_color);
 	}
 }
 
+
+
 void print_line(char* str) {
-	print_string(str);
-	print_character('\n');
+	print_line_with_color(str, terminal_background_color, terminal_font_color);
 }
+
+void print_line_with_color(char* str, VGA_Color bg_color, VGA_Color font_color) {
+	print_string_with_color(str, bg_color, font_color);
+	print_character_with_color('\n', bg_color, font_color);
+}
+
+
+void set_terminal_font_color(VGA_Color col) {
+
+     terminal_font_color = col;
+
+}
+
+ 
+
+void set_terminal_background_color(VGA_Color col) {
+
+     terminal_background_color = col;
+
+}
+
